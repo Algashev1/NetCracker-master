@@ -1,0 +1,41 @@
+CREATE DATABASE Task_manager
+USE Task_manager
+
+CREATE TABLE Client
+       (u_id INT(4) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+        u_name VARCHAR(15),
+        u_login VARCHAR(15) NOT NULL UNIQUE,
+        u_password VARCHAR(15) NOT NULL);
+        
+INSERT INTO Client VALUES
+        (NULL, 'Gennadiy',  'Algashev', 'password1');
+INSERT INTO Client VALUES
+        (NULL, 'Sergei',  'Shashkin', 'password2');
+        
+
+CREATE TABLE Task
+       (t_id INT(4) NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+        t_index INT(1) NOT NULL DEFAULT 1,
+        t_name VARCHAR(20) NOT NULL,
+        t_description VARCHAR(200),
+        t_data DATETIME NOT NULL,
+        t_contacts VARCHAR(200),
+        t_parent INT(4),
+        u_id INT(4) NOT NULL,
+        FOREIGN KEY (u_id)REFERENCES Client(u_id),
+        FOREIGN KEY (t_parent)REFERENCES Task(t_id));
+       
+INSERT INTO Task VALUES
+        (NULL, 1,  'Task1', 'NULL', '2017-03-25 15:00', NULL, NULL, 1);
+INSERT INTO Task VALUES
+        (NULL, DEFAULT,  'Task2', 'NULL', '2017-05-30 12:30', NULL, NULL, 1);
+INSERT INTO Task VALUES
+        (NULL, DEFAULT,  'Task3', 'NULL', '2017-05-25 15:30', NULL, 1, 1);
+        
+        
+SELECT t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i') AS "time", t_contacts, u_id  FROM Task;
+        
+        
+       
+        
+       

@@ -1,0 +1,95 @@
+.cont{
+    padding-top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.cont2{
+    padding-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+.btn{
+    padding: 5px 10px;
+    background: #4caf50;
+    color: #fff;
+    cursor: pointer;
+}
+.btn:hover{
+    background: #8bc34a;
+}
+.sub-btn{
+    float: right;
+}
+
+form{
+    width: 239px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.btns{
+    width: 293px;
+    margin-left: auto;
+    margin-right: auto;
+}
+input{
+    margin-bottom: 5px;
+}
+
+.message{
+    color: red;
+}
+
+.active {
+    background: #2cc16a;
+    color: black;
+}
+
+.bg {
+    background: grey;
+    color: black;
+}
+
+.cont{
+    width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.taskTable{
+    margin-top: 10px;
+    margin-bottom: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+.th2 {
+    padding: 10px; 
+    border: 1px solid black;
+}
+.td2 {
+    font-size: 0.8em;
+    padding: 5px 7px;
+    border: 1px solid black;
+}
+
+textarea{
+    width: 167px;
+}
+
+.labels tr td {
+    background-color: #2cc16a;
+}
+.label tr td label {
+    display: block;
+}
+[data-toggle="toggle"] {
+    display: none;
+}
+
+
