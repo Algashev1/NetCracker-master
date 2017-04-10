@@ -33,15 +33,15 @@
                 }
 
                 if (login != "" && password != "") {
+                    Connection conn = null;
                     try {
-                        Connection conn = null;
                         Context ctx = new InitialContext();
-                        DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/TestDB");
+                        DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
                         conn = ds.getConnection();
                         String sql = "SELECT * FROM Client";
                         PreparedStatement pStatement = conn.prepareStatement(sql);
                         ResultSet result = pStatement.executeQuery();
-                        
+
                         while (result.next()) {
                             if (result.getObject(3).toString().equals(login) && result.getObject(4).toString().equals(password)) {
                                 HttpSession s = request.getSession(true);
@@ -56,6 +56,7 @@
                             }
                         }
                         result.close();
+                        pStatement.close();
                         ctx.close();
                         conn.close();
                     } catch (Exception e) {

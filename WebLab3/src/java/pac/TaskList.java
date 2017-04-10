@@ -1,26 +1,30 @@
 package pac;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 public class TaskList {
 
-    Connection connection;
     private ArrayList<Task> list = new ArrayList<>();
     StringBuilder tasksId = new StringBuilder();
     private int userId;
 
-    public TaskList() throws SQLException, ClassNotFoundException {
-        Class.forName("com.mysql.jdbc.Driver");
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-        PreparedStatement st = connection.prepareStatement("select t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id from Task where t_parent is NULL");
-        ResultSet result = st.executeQuery();
+    public TaskList() throws SQLException, ClassNotFoundException, NamingException {
+        Connection conn;
+        Context ctx = new InitialContext();
+        DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+        conn = ds.getConnection();
+        String sql = "SELECT t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id FROM Task WHERE t_parent is NULL";
+        PreparedStatement pStatement = conn.prepareStatement(sql);
+        ResultSet result = pStatement.executeQuery();
         boolean index = false;
         while (result.next()) {
             Task task = new Task();
@@ -39,17 +43,20 @@ public class TaskList {
             task.setIndex(index);
             list.add(task);
         }
-        result.close();
-        st.close();
-        connection.close();
+        pStatement.close();
+        ctx.close();
+        conn.close();
     }
 
-    public ArrayList<Task> parentTask(int id) throws SQLException, ClassNotFoundException {
-        Class.forName("com.mysql.jdbc.Driver");
-        connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-        PreparedStatement st = connection.prepareStatement("select t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id from Task where t_parent = ?");
-        st.setInt(1, id);
-        ResultSet result = st.executeQuery();
+    public ArrayList<Task> parentTask(int id) throws SQLException, ClassNotFoundException, NamingException {
+        Connection conn;
+        Context ctx = new InitialContext();
+        DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+        conn = ds.getConnection();
+        String sql = "SELECT t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id FROM Task WHERE t_parent = ?";
+        PreparedStatement pStatement = conn.prepareStatement(sql);
+        pStatement.setInt(1, id);
+        ResultSet result = pStatement.executeQuery();
         ArrayList<Task> list2 = new ArrayList<>();
         boolean index = false;
         while (result.next()) {
@@ -70,8 +77,9 @@ public class TaskList {
             list2.add(task);
         }
         result.close();
-        st.close();
-        connection.close();
+        pStatement.close();
+        ctx.close();
+        conn.close();
         return list2;
     }
 
@@ -89,8 +97,8 @@ public class TaskList {
     }
 
     //поиск задачи по имени
-    public ArrayList <String> findTask(String name) {
-        ArrayList <String> l = new ArrayList<String>();
+    public ArrayList<String> findTask(String name) {
+        ArrayList<String> l = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             if (list.get(i).getName().equals(name)) {
                 l.add(list.get(i).getId());
@@ -98,28 +106,31 @@ public class TaskList {
         }
         if (l.size() > 0) {
             return l;
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     public String updateTask(int id, String name, String desc, String time, String cont) {
         if ((!name.equals("")) && (!time.equals(""))) {
-            String updateSQL = "UPDATE Task SET t_name = ?, t_description = ?, t_data = ?, t_contacts = ? WHERE t_id = ?";
+            Connection conn;
             try {
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-                PreparedStatement st = connection.prepareStatement(updateSQL);
-                st.setString(1, name);
-                st.setString(2, desc);
-                st.setString(3, time);
-                st.setString(4, cont);
-                st.setInt(5, id);
-                st.execute();
-                st.close();
-                connection.close();
+                Context ctx = new InitialContext();
+                DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+                conn = ds.getConnection();
+                String sql = "UPDATE Task SET t_name = ?, t_description = ?, t_data = ?, t_contacts = ? WHERE t_id = ?";
+                PreparedStatement pStatement = conn.prepareStatement(sql);
+                pStatement.setString(1, name);
+                pStatement.setString(2, desc);
+                pStatement.setString(3, time);
+                pStatement.setString(4, cont);
+                pStatement.setInt(5, id);
+                pStatement.execute();
+                pStatement.close();
+                ctx.close();
+                conn.close();
                 return "Изменение задачи в БД прошло успешно!";
-            } catch (SQLException e) {
+            } catch (SQLException | NamingException e) {
                 if (e.getMessage().contains("Incorrect datetime value")) {
                     return "Неверный формат даты и времени!";
                 } else {
@@ -141,20 +152,24 @@ public class TaskList {
     //добавление задачи
     public String addTask(String name, String desc, String time, String cont) {
         if ((!name.equals("")) && (!time.equals(""))) {
-            String insertSQL = "INSERT INTO Task VALUES(NULL, DEFAULT, ?, ?, ?, ?, NULL, ?)";
+            Connection conn;
             try {
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-                PreparedStatement st = connection.prepareStatement(insertSQL);
-                st.setString(1, name);
-                st.setString(2, desc);
-                st.setString(3, time);
-                st.setString(4, cont);
-                st.setInt(5, userId);
-                st.execute();
-                st.close();
-                connection.close();
+                Context ctx = new InitialContext();
+                DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+                conn = ds.getConnection();
+                String sql = "INSERT INTO Task VALUES(NULL, DEFAULT, ?, ?, ?, ?, NULL, ?)";
+                PreparedStatement pStatement = conn.prepareStatement(sql);
+                pStatement.setString(1, name);
+                pStatement.setString(2, desc);
+                pStatement.setString(3, time);
+                pStatement.setString(4, cont);
+                pStatement.setInt(5, userId);
+                pStatement.execute();
+                pStatement.close();
+                ctx.close();
+                conn.close();
                 return "Добавление задачи в БД прошло успешно!";
-            } catch (SQLException e) {
+            } catch (SQLException | NamingException e) {
                 if (e.getMessage().contains("Incorrect datetime value")) {
                     return "Неверный формат даты и времени!";
                 } else {
@@ -175,21 +190,25 @@ public class TaskList {
 
     public String addTaskChild(String id, String name, String desc, String time, String cont) {
         if ((!name.equals("")) && (!time.equals(""))) {
-            String insertSQL = "INSERT INTO Task VALUES(NULL, DEFAULT, ?, ?, ?, ?, ?, ?)";
+            Connection conn;
             try {
-                connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-                PreparedStatement st = connection.prepareStatement(insertSQL);
-                st.setString(1, name);
-                st.setString(2, desc);
-                st.setString(3, time);
-                st.setString(4, cont);
-                st.setString(5, id);
-                st.setInt(6, userId);
-                st.execute();
-                st.close();
-                connection.close();
+                Context ctx = new InitialContext();
+                DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+                conn = ds.getConnection();
+                String sql = "INSERT INTO Task VALUES(NULL, DEFAULT, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement pStatement = conn.prepareStatement(sql);
+                pStatement.setString(1, name);
+                pStatement.setString(2, desc);
+                pStatement.setString(3, time);
+                pStatement.setString(4, cont);
+                pStatement.setString(5, id);
+                pStatement.setInt(6, userId);
+                pStatement.execute();
+                pStatement.close();
+                ctx.close();
+                conn.close();
                 return "Добавление подзадачи в БД прошло успешно!";
-            } catch (SQLException e) {
+            } catch (SQLException | NamingException e) {
                 if (e.getMessage().contains("Incorrect datetime value")) {
                     return "Неверный формат даты и времени!";
                 } else {
@@ -210,86 +229,90 @@ public class TaskList {
 
     //удаление задачи
     public String delTask(int id) {
-        String deleteSQL = "DELETE FROM Task WHERE t_id = ?";
+        Connection conn;
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-            PreparedStatement st = connection.prepareStatement(deleteSQL);
-            st.setInt(1, id);
-            st.execute();
-            st.close();
-            connection.close();
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+            conn = ds.getConnection();
+            String sql = "DELETE FROM Task WHERE t_id = ?";
+            PreparedStatement pStatement = conn.prepareStatement(sql);
+            pStatement.setInt(1, id);
+            pStatement.execute();
+            pStatement.close();
+            ctx.close();
+            conn.close();
             return "Удаление задачи из БД прошло успешно!";
-        } catch (SQLException e) {
+        } catch (SQLException | NamingException e) {
             return e.getMessage();
         }
     }
-    
+
     public String countSubtask(String id) {
-        String countSQL = "SELECT COUNT(*) FROM Task WHERE t_parent = ?";
+        Connection conn;
         String message = "0";
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-            PreparedStatement st = connection.prepareStatement(countSQL);
-            st.setString(1, id);
-            ResultSet result = st.executeQuery();
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+            conn = ds.getConnection();
+            String sql = "SELECT COUNT(*) FROM Task WHERE t_parent = ?";
+            PreparedStatement pStatement = conn.prepareStatement(sql);
+            pStatement.setString(1, id);
+            ResultSet result = pStatement.executeQuery();
             if (result.next()) {
                 message = result.getString(1);
             }
             result.close();
-            st.close();
-            connection.close();
+            pStatement.close();
+            ctx.close();
+            conn.close();
             return message;
-        } catch (SQLException e) {
+        } catch (SQLException | NamingException e) {
             return message;
         }
     }
 
     //сортировать задачи по дате
     public void sortDate() {
-        Collections.sort(list, new Comparator<Task>() {
-            public int compare(Task t1, Task t2) {
-                return t1.getTime().compareTo(t2.getTime());
-            }
-        });
+        Collections.sort(list, (Task t1, Task t2) -> t1.getTime().compareTo(t2.getTime()));
     }
 
     //сортировать задачи по названию
     public void sortName() {
-        Collections.sort(list, new Comparator<Task>() {
-            public int compare(Task t1, Task t2) {
-                return t1.getName().compareTo(t2.getName());
-            }
-        });
+        Collections.sort(list, (Task t1, Task t2) -> t1.getName().compareTo(t2.getName()));
     }
 
     //ввод индекса задачи
     public String setIndex(int id) throws SQLException, ClassNotFoundException {
-        String indexSQL = "SELECT t_index FROM Task WHERE t_id = ?";
+        Connection conn;
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-            PreparedStatement st = connection.prepareStatement(indexSQL);
-            st.setInt(1, id);
-            ResultSet result = st.executeQuery();
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+            conn = ds.getConnection();
+            String sql = "SELECT t_index FROM Task WHERE t_id = ?";
+            PreparedStatement pStatement = conn.prepareStatement(sql);
+            pStatement.setInt(1, id);
+            ResultSet result = pStatement.executeQuery();
             int n;
             if (result.next()) {
                 n = result.getInt(1);
                 if (n == 1) {
-                    st.clearParameters();
-                    st = connection.prepareStatement("UPDATE Task SET t_index = '2' WHERE t_id = ?");
-                    st.setInt(1, id);
-                    st.execute();
+                    pStatement.clearParameters();
+                    pStatement = conn.prepareStatement("UPDATE Task SET t_index = '2' WHERE t_id = ?");
+                    pStatement.setInt(1, id);
+                    pStatement.execute();
                 } else {
-                    st.clearParameters();
-                    st = connection.prepareStatement("UPDATE Task SET t_index = '1' WHERE t_id = ?");
-                    st.setInt(1, id);
-                    st.execute();
+                    pStatement.clearParameters();
+                    pStatement = conn.prepareStatement("UPDATE Task SET t_index = '1' WHERE t_id = ?");
+                    pStatement.setInt(1, id);
+                    pStatement.execute();
                 }
             }
             result.close();
-            st.close();
-            connection.close();
+            pStatement.close();
+            ctx.close();
+            conn.close();
             return "Статус задачи успешно изменен!";
-        } catch (SQLException e) {
+        } catch (SQLException | NamingException e) {
             return e.getMessage();
         }
     }
@@ -303,21 +326,25 @@ public class TaskList {
     }
 
     public ArrayList<String> overdueTask(int id) {
-        ArrayList<String> list = new ArrayList<String>();
-        String overdueSQL = "SELECT t_name FROM Task WHERE t_index = 1 AND u_id = ?";
+        Connection conn;
+        ArrayList<String> l = new ArrayList<>();
         try {
-            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-            PreparedStatement st = connection.prepareStatement(overdueSQL);
-            st.setInt(1, id);
-            ResultSet result = st.executeQuery();
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
+            conn = ds.getConnection();
+            String sql = "SELECT t_name FROM Task WHERE t_index = 1 AND u_id = ?";
+            PreparedStatement pStatement = conn.prepareStatement(sql);
+            pStatement.setInt(1, id);
+            ResultSet result = pStatement.executeQuery();
             while (result.next()) {
-                list.add(result.getObject(1).toString());
+                l.add(result.getObject(1).toString());
             }
             result.close();
-            st.close();
-            connection.close();
-            return list;
-        } catch (SQLException e) {
+            pStatement.close();
+            ctx.close();
+            conn.close();
+            return l;
+        } catch (SQLException | NamingException e) {
             return null;
         }
     }
