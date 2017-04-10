@@ -4,6 +4,9 @@
     Author     : 1
 --%>
 
+<%@page import="javax.sql.DataSource"%>
+<%@page import="javax.naming.InitialContext"%>
+<%@page import="javax.naming.Context"%>
 <%@page import="java.sql.*"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
@@ -31,10 +34,14 @@
 
                 if (login != "" && password != "") {
                     try {
-                        Class.forName("com.mysql.jdbc.Driver");
-                        Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/task_manager", "root", "364822984");
-                        PreparedStatement st = connection.prepareStatement("select * from Client");
-                        ResultSet result = st.executeQuery();
+                        Connection conn = null;
+                        Context ctx = new InitialContext();
+                        DataSource ds = (DataSource)ctx.lookup("java:comp/env/jdbc/TestDB");
+                        conn = ds.getConnection();
+                        String sql = "SELECT * FROM Client";
+                        PreparedStatement pStatement = conn.prepareStatement(sql);
+                        ResultSet result = pStatement.executeQuery();
+                        
                         while (result.next()) {
                             if (result.getObject(3).toString().equals(login) && result.getObject(4).toString().equals(password)) {
                                 HttpSession s = request.getSession(true);
@@ -49,8 +56,8 @@
                             }
                         }
                         result.close();
-                        st.close();
-                        connection.close();
+                        ctx.close();
+                        conn.close();
                     } catch (Exception e) {
                         answer = "Регистрация не прошла! Исключение:" + e.getMessage();
                     }
