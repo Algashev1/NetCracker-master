@@ -22,12 +22,10 @@
     }
 
     if ((url != null) && (id.equals("")) && (request.getParameter("name") != null) && (request.getParameter("time") != null)) {
-        TaskList list = new TaskList();
-        list.setUserId(Integer.parseInt(session.getAttribute("id").toString()));
+        TaskList list = new TaskList(Integer.parseInt(session.getAttribute("id").toString()));
         message = list.addTask(request.getParameter("name"), request.getParameter("description"), request.getParameter("time"), request.getParameter("contacts"));
     } else if ((url != null) && (request.getParameter("name") != null) && (request.getParameter("time") != null)) {
-        TaskList list = new TaskList();
-        list.setUserId(Integer.parseInt(session.getAttribute("id").toString()));
+        TaskList list = new TaskList(Integer.parseInt(session.getAttribute("id").toString()));
         message = list.addTaskChild(id, request.getParameter("name"), request.getParameter("description"), request.getParameter("time"), request.getParameter("contacts"));
     }
 %>

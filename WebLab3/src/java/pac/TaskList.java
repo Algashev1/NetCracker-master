@@ -17,13 +17,15 @@ public class TaskList {
     StringBuilder tasksId = new StringBuilder();
     private int userId;
 
-    public TaskList() throws SQLException, ClassNotFoundException, NamingException {
+    public TaskList(int id) throws SQLException, ClassNotFoundException, NamingException {
+        userId = id;
         Connection conn;
         Context ctx = new InitialContext();
         DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
         conn = ds.getConnection();
-        String sql = "SELECT t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id FROM Task WHERE t_parent is NULL";
+        String sql = "SELECT t_id, t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id FROM Task WHERE u_id = ? AND t_parent is NULL";
         PreparedStatement pStatement = conn.prepareStatement(sql);
+        pStatement.setInt(1, id);
         ResultSet result = pStatement.executeQuery();
         boolean index = false;
         while (result.next()) {

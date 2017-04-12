@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<mapping>
+    <data sql="SELECT t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i') as t_data, t_contacts FROM Task WHERE t_parent is NULL"/>
+    <root name="taskInfo" rowName="task">
+        <element name="t_name">
+            <content>t_name</content>
+        </element>
+        <element name="t_index">
+            <content>t_index</content>
+        </element>
+        <element name="t_description">
+            <content>t_description</content>
+        </element>
+        <element name="t_data">
+            <content>t_data</content>
+        </element>
+        <element name="t_contacts">
+            <content>t_contacts</content>
+        </element>
+    </root>
+</mapping>

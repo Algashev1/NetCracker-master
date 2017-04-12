@@ -32,8 +32,7 @@
     id = session.getAttribute("taskId").toString();
 
     if (request.getParameter("name") != null && request.getParameter("time") != null) {
-        TaskList list = new TaskList();
-        list.setUserId(Integer.parseInt(session.getAttribute("id").toString()));
+        TaskList list = new TaskList(Integer.parseInt(session.getAttribute("id").toString()));
         message = list.updateTask(Integer.parseInt(id), request.getParameter("name"), request.getParameter("description"), request.getParameter("time"), request.getParameter("contacts"));
     }
 

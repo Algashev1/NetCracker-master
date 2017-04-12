@@ -86,8 +86,9 @@
                 if (session.getAttribute("id") == "null") {
                     response.sendRedirect("http://localhost:8084/WebLab3/");
                 } else {
-                    TaskList taskList = new TaskList();
-                    taskList.setUserId(Integer.parseInt(session.getAttribute("id").toString()));
+                    TaskList taskList = new TaskList(Integer.parseInt(session.getAttribute("id").toString()));
+                    OperationsTasks.getTaskList();
+                   
 
                     int actTaskNum = -1;
                     String buf = "";
