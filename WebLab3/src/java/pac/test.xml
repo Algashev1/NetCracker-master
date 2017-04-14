@@ -1,1 +1,37 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><taskInfo><task><t_name>Task4</t_name><t_index>2</t_index><t_description>qq</t_description><t_data>2017-03-20 12:15</t_data><t_contacts>qq</t_contacts></task><task><t_name>Task5</t_name><t_index>2</t_index><t_description>ww</t_description><t_data>2017-03-22 09:00</t_data><t_contacts>ww</t_contacts></task><task><t_name>Task1011</t_name><t_index>1</t_index><t_description>task desc</t_description><t_data>2017-04-02 12:00</t_data><t_contacts>task cont</t_contacts></task><task><t_name>22222</t_name><t_index>1</t_index><t_description>22222</t_description><t_data>2017-05-03 12:15</t_data><t_contacts>22222</t_contacts></task><task><t_name>Task10</t_name><t_index>1</t_index><t_description>opisanie</t_description><t_data>2017-04-02 11:00</t_data><t_contacts>kontakti</t_contacts></task><task><t_name>Task2</t_name><t_index>1</t_index><t_description/><t_data>2017-04-01 16:10</t_data><t_contacts/></task><task><t_name>MyTask</t_name><t_index>1</t_index><t_description/><t_data>2017-04-10 21:00</t_data><t_contacts/></task></taskInfo>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><taskinfo>
+    <task>
+        <t_name>Task1</t_name>
+        <t_index>2</t_index>
+        <t_description>my task1</t_description>
+        <t_data>2017-04-20 12:15</t_data>
+        <t_contacts>cont1</t_contacts>
+    </task>
+    <task>
+        <t_name>Task2</t_name>
+        <t_index>2</t_index>
+        <t_description>my task2</t_description>
+        <t_data>2017-04-22 09:00</t_data>
+        <t_contacts>cont2</t_contacts>
+    </task>
+    <task>
+        <t_name>Task3</t_name>
+        <t_index>1</t_index>
+        <t_description>my task3</t_description>
+        <t_data>2017-04-14 12:00</t_data>
+        <t_contacts>cont3</t_contacts>
+    </task>
+    <task>
+        <t_name>Task4</t_name>
+        <t_index>1</t_index>
+        <t_description>my task4</t_description>
+        <t_data>2017-05-03 12:15</t_data>
+        <t_contacts>cont4</t_contacts>
+    </task>
+    <task>
+        <t_name>Task5</t_name>
+        <t_index>1</t_index>
+        <t_description>my task5</t_description>
+        <t_data>2017-04-10 21:00</t_data>
+        <t_contacts>cont5</t_contacts>
+    </task>
+</taskinfo>

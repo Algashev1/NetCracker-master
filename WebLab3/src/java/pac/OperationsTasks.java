@@ -1,6 +1,7 @@
 package pac;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.*;
@@ -16,17 +17,21 @@ import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class OperationsTasks {
 
@@ -122,70 +127,47 @@ public class OperationsTasks {
         }
     }
 
-    public static void getTaskList() {
-        //Создание объекта Document 
+    public static void getTaskList(int id) {
         Document mapDoc = null;
-        //Определение нового объекта Document 
         Document dataDoc = null;
-        //Создание нового Document
         Document newDoc = null;
         Connection conn;
         try {
-            //Создание DocumentBuilderFactory
             DocumentBuilderFactory dbfactory = DocumentBuilderFactory.newInstance();
-            // Создание DocumentBuilder
             DocumentBuilder docbuilder = dbfactory.newDocumentBuilder();
-            //Разбор файла для создания Document
             mapDoc = docbuilder.parse("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping.xml");
-            // Создание нового экземпляра Document 
             dataDoc = docbuilder.newDocument();
-            // Создание нового объекта Document
             newDoc = docbuilder.newDocument();
 
         } catch (Exception e) {
             System.out.println("Problem creating document: " + e.getMessage());
         }
-        //Выборка корневого элемента
         Element mapRoot = mapDoc.getDocumentElement();
-        //Выборка (только) элемента данных и преобразование его в Element
-        Node dataNode = mapRoot.getElementsByTagName("data").item(0);
-        Element dataElement = (Element) dataNode;
-        //Выборка оператора sql 
-        String sql = dataElement.getAttribute("sql");
-        //Вывод SQL-оператора
-        System.out.println(sql);
+        String sql = "SELECT t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i') as t_data, t_contacts FROM Task WHERE u_id = ? AND t_parent is NULL";
 
         ResultSetMetaData resultmetadata = null;
-        // Создание нового элемента с именем "data"
         Element dataRoot = dataDoc.createElement("data");
         try {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
-            conn = ds.getConnection();  
+            conn = ds.getConnection();
             PreparedStatement pStatement = conn.prepareStatement(sql);
+            pStatement.setInt(1, id);
             ResultSet result = pStatement.executeQuery();
             resultmetadata = result.getMetaData();
             int numCols = resultmetadata.getColumnCount();
             while (result.next()) {
-                //Для каждой строки данных
-                // Создание нового элемента с именем "row"
                 Element rowEl = dataDoc.createElement("row");
                 for (int i = 1; i <= numCols; i++) {
-                    // Для каждого столбца, выборка имени и данных
                     String colName = resultmetadata.getColumnName(i);
                     String colVal = result.getString(i);
-                    //Если нет данных, добавить "null"
                     if (result.wasNull()) {
                         colVal = "null";
                     }
-                    // Создание нового элемента с тем же именем, что и у столбца
                     Element dataEl = dataDoc.createElement(colName);
-                    //Добавление данных к новому элементу
                     dataEl.appendChild(dataDoc.createTextNode(colVal));
-                    // Добавление нового элемента к строке
                     rowEl.appendChild(dataEl);
                 }
-                //Добавление строки к корневому элементу
                 dataRoot.appendChild(rowEl);
             }
         } catch (SQLException e) {
@@ -195,39 +177,25 @@ public class OperationsTasks {
         } finally {
             System.out.println("Closing connections...");
         }
-        //Добавление корневого элемента к документу
-        dataDoc.appendChild(dataRoot);      
-        //Выборка корневого элемента (называвемого "root")
+        dataDoc.appendChild(dataRoot);
         Element newRootInfo = (Element) mapRoot.getElementsByTagName("root").item(0);
-        // Выборка информации о корне и строке
         String newRootName = newRootInfo.getAttribute("name");
         String newRowName = newRootInfo.getAttribute("rowName");
-        // Выборка информации об элементе, встраиваемом в новый документ
         NodeList newNodesMap = mapRoot.getElementsByTagName("element");
-        //Создание конечного корневого элемента с именем из файла отображения
         Element newRootElement = newDoc.createElement(newRootName);
-        //Выборка всех строк в старом документе
         NodeList oldRows = dataRoot.getElementsByTagName("row");
         for (int i = 0; i < oldRows.getLength(); i++) {
-            //Выборка каждой строки
             Element thisRow = (Element) oldRows.item(i);
-            //Создание новой строки
             Element newRow = newDoc.createElement(newRowName);
             for (int j = 0; j < newNodesMap.getLength(); j++) {
-                //Для каждого узла в новом отображении, выборка информации
-                //Сначала новая информация...
                 Element thisElement = (Element) newNodesMap.item(j);
                 String newElementName = thisElement.getAttribute("name");
-                //Затем старая информация
                 Element oldElement = (Element) thisElement.getElementsByTagName("content").item(0);
                 String oldField = oldElement.getFirstChild().getNodeValue();
-                //Получение исходных значений на основе информации отображения
                 Element oldValueElement = (Element) thisRow.getElementsByTagName(oldField).item(0);
                 String oldValue = oldValueElement.getFirstChild().getNodeValue();
-                //Создание нового элемента
                 Element newElement = newDoc.createElement(newElementName);
                 newElement.appendChild(newDoc.createTextNode(oldValue));
-                //Выборка списка элементов
                 NodeList newAttributes = thisElement.getElementsByTagName("attribute");
 //                for (int k = 0; k < newAttributes.getLength(); k++) {
 //                    //Для каждого нового атрибута
@@ -241,13 +209,10 @@ public class OperationsTasks {
 //                    //Создание нового атрибута
 //                    newElement.setAttribute(newAttributeName, oldAttributeValue);
 //                }
-                //Добавление нового элемента к новой строке
                 newRow.appendChild(newElement);
             }
-            //Добавление новой строки к корню
             newRootElement.appendChild(newRow);
         }
-        //Добавление нового корня к документу
         newDoc.appendChild(newRootElement);
 
         Transformer trf = null;
@@ -265,7 +230,46 @@ public class OperationsTasks {
         } catch (IOException e) {
             e.printStackTrace(System.out);
         }
+    }
 
-        int a = 0;
+    public static void taskXSLT() {
+        try {
+            TransformerFactory tFactory = TransformerFactory.newInstance();
+            Transformer transformer = tFactory.newTransformer(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping.xsl"));
+            transformer.transform(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml"), new StreamResult(new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\web\\test.html")));
+
+        } catch (TransformerConfigurationException ex) {
+            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (TransformerException | FileNotFoundException ex) {
+            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static boolean checkXMLforXSD() {
+        try {
+            File xml = new File("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml");
+            File xsd = new File("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\xmlSchema.xsd");
+
+            if (!xml.exists()) {
+                System.out.println("Не найден XML");
+            }
+
+            if (!xsd.exists()) {
+                System.out.println("Не найден XSD");
+            }
+
+            if (!xml.exists() || !xsd.exists()) {
+                return false;
+            }
+
+            SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            Schema schema = factory.newSchema(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml"));
+            Validator validator = schema.newValidator();
+            validator.validate(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\xmlSchema.xsd"));
+            return true;
+        } catch (SAXException | IOException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 }
