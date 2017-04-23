@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapping>
+    <data/>
+    <root name="taskinfo" rowName="task">
+        <element name="t_name">
+            <content>t_name</content>
+        </element>
+        <element name="t_description">
+            <content>t_description</content>
+        </element>
+        <element name="t_data">
+            <content>t_data</content>
+        </element>
+        <element name="t_contacts">
+            <content>t_contacts</content>
+        </element>
+    </root>
+</mapping>

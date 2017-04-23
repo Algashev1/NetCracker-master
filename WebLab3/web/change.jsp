@@ -36,6 +36,8 @@
         message = list.updateTask(Integer.parseInt(id), request.getParameter("name"), request.getParameter("description"), request.getParameter("time"), request.getParameter("contacts"));
     }
 
+    OperationsTasks.getTask(Integer.parseInt(id));
+    OperationsTasks.taskXSLT2();
     if (!id.equals("")) {
         ArrayList<String> list = OperationsTasks.returnTask(id);
         if (list != null) {
@@ -58,8 +60,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Изменение задачи</title>
         <link rel="stylesheet" href="style.css">
+        <link rel="import" href="test2.html">
     </head>
     <body>
+        <script>
+            var test2 = document.querySelector('link[rel="import"]').import;
+            var div = test2.querySelector('.test2');
+        </script>
         <div class="cont">
             <a class="btn" href="tasks.jsp?taskid=<%=session.getAttribute("taskId")%>">Назад</a>
             <h3>Заполните форму и нажмите на кнопку "Изменить"</h3>
@@ -68,22 +75,25 @@
                 <table>
                     <tr>
                         <td>Имя:</td>
-                        <td><input type="text" name="name" value="<%=task.getName()%>"/></td>
+                        <td><input type="text" name="name2" value="<%=task.getName()%>"/></td>
                     </tr>
                     <tr>
                         <td>Описание:</td>
-                        <td><textarea name="description"><%=task.getDescription()%></textarea></td>
+                        <td><textarea name="description2"><%=task.getDescription()%></textarea></td>
                     </tr>
                     <tr>
                         <td>Дата/Время:</td>
-                        <td><input type="datetime" name="time" value="<%=task.getTime()%>"/></td>
+                        <td><input type="datetime" name="time2" value="<%=task.getTime()%>"/></td>
                     </tr>
                     <tr>
                         <td>Контакты:</td>
-                        <td><textarea name="contacts"><%=task.getContacts()%></textarea></td>
+                        <td><textarea name="contacts2"><%=task.getContacts()%></textarea></td>
                     </tr>
                 </table>
                 <input type="submit" value="Изменить" />
+                <script>
+                    document.body.appendChild(div.cloneNode(true));
+                </script>
             </form>
         </div>
     </body>
