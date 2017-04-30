@@ -341,17 +341,25 @@ public class OperationsTasks {
 
     public static void taskXSLT2() {
         try {
+            String s1 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping2.xsl";
+            String s2 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\web\\test2.html";
+            String s3 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test2.xml";
             TransformerFactory tFactory = TransformerFactory.newInstance();
-            Transformer transformer = tFactory.newTransformer(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping2.xsl"));
-            transformer.transform(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test2.xml"), new StreamResult(new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\web\\test2.html")));
-
+            Transformer transformer = tFactory.newTransformer(new StreamSource(s1));
+            FileOutputStream fout = new FileOutputStream(s2);
+            StreamSource ss = new StreamSource(s3);
+            StreamResult sr = new StreamResult(fout);
+            transformer.transform(ss, sr);
+            Thread.sleep(2000);
         } catch (TransformerConfigurationException ex) {
             Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
         } catch (TransformerException | FileNotFoundException ex) {
             Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | InterruptedException ex) {
+            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
+
     public static boolean checkXMLforXSD() {
         try {
             String xml = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml";
