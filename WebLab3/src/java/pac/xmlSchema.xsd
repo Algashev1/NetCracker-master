@@ -4,11 +4,10 @@
    <xs:element name="taskinfo">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="task" maxOccurs="unbounded" minOccurs="0">
+        <xs:element name="task" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
               <xs:element type="xs:string" name="t_name"/>
-              <xs:element type="xs:byte" name="t_index"/>
               <xs:element type="xs:string" name="t_description"/>
               <xs:element type="xs:string" name="t_data"/>
               <xs:element type="xs:string" name="t_contacts"/>

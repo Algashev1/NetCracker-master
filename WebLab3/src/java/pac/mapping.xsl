@@ -1,39 +1,53 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:template match="/">
-        <html>
-            <body>
-                <h2>Проверка вывода данных через XSLT</h2>
-                <table border="1">
-                    <tr bgcolor="#9acd32">
-                        <th>Name</th>
-                        <th>Index</th>
-                        <th>Description</th>
-                        <th>Time</th>
-                        <th>Contacts</th>
-                    </tr>
+        <template>
+            <div>
+                <table>
                     <xsl:for-each select="taskinfo/task">
                         <tr>
+                            <td>Name</td>
                             <td>
-                                <xsl:value-of select="t_name"/>
+                                <input type="text" name="name">
+                                    <xsl:attribute name="value">
+                                        <xsl:value-of select="t_name" />
+                                    </xsl:attribute>
+                                </input>
                             </td>
+                        </tr>
+                        <tr>
+                            <td>Description</td>
                             <td>
-                                <xsl:value-of select="t_index"/>
+                                <input type="text" name="description">
+                                    <xsl:attribute name="value">
+                                        <xsl:value-of select="t_description" />
+                                    </xsl:attribute>
+                                </input>
                             </td>
+                        </tr>
+                        <tr>
+                            <td>Time</td>
                             <td>
-                                <xsl:value-of select="t_description"/>
+                                <input type="text" name="time">
+                                    <xsl:attribute name="value">
+                                        <xsl:value-of select="t_data" />
+                                    </xsl:attribute>
+                                </input>
                             </td>
+                        </tr>
+                        <tr>
+                            <td>Contacts</td>
                             <td>
-                                <xsl:value-of select="t_data"/>
-                            </td>
-                            <td>
-                                <xsl:value-of select="t_contacts"/>
+                                <input type="text" name="contacts">
+                                    <xsl:attribute name="value">
+                                        <xsl:value-of select="t_contacts" />
+                                    </xsl:attribute>
+                                </input>
                             </td>
                         </tr>
                     </xsl:for-each>
                 </table>
-                <a href="tasks.jsp">Назад</a>
-            </body>
-        </html>
+            </div>
+        </template>
     </xsl:template>
 </xsl:stylesheet>

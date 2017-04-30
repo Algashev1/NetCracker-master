@@ -128,111 +128,6 @@ public class OperationsTasks {
         }
     }
 
-    public static void getTaskList(int id) {
-        Document mapDoc = null;
-        Document dataDoc = null;
-        Document newDoc = null;
-        Connection conn;
-        try {
-            DocumentBuilderFactory dbfactory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder docbuilder = dbfactory.newDocumentBuilder();
-            mapDoc = docbuilder.parse("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping.xml");
-            dataDoc = docbuilder.newDocument();
-            newDoc = docbuilder.newDocument();
-
-        } catch (Exception e) {
-            System.out.println("Problem creating document: " + e.getMessage());
-        }
-        Element mapRoot = mapDoc.getDocumentElement();
-        String sql = "SELECT t_index, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i') as t_data, t_contacts FROM Task WHERE u_id = ? AND t_parent is NULL";
-
-        ResultSetMetaData resultmetadata = null;
-        Element dataRoot = dataDoc.createElement("data");
-        try {
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
-            conn = ds.getConnection();
-            PreparedStatement pStatement = conn.prepareStatement(sql);
-            pStatement.setInt(1, id);
-            ResultSet result = pStatement.executeQuery();
-            resultmetadata = result.getMetaData();
-            int numCols = resultmetadata.getColumnCount();
-            while (result.next()) {
-                Element rowEl = dataDoc.createElement("row");
-                for (int i = 1; i <= numCols; i++) {
-                    String colName = resultmetadata.getColumnName(i);
-                    String colVal = result.getString(i);
-                    if (result.wasNull()) {
-                        colVal = "null";
-                    }
-                    Element dataEl = dataDoc.createElement(colName);
-                    dataEl.appendChild(dataDoc.createTextNode(colVal));
-                    rowEl.appendChild(dataEl);
-                }
-                dataRoot.appendChild(rowEl);
-            }
-        } catch (SQLException e) {
-            System.out.println("SQL Error: " + e.getMessage());
-        } catch (NamingException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            System.out.println("Closing connections...");
-        }
-        dataDoc.appendChild(dataRoot);
-        Element newRootInfo = (Element) mapRoot.getElementsByTagName("root").item(0);
-        String newRootName = newRootInfo.getAttribute("name");
-        String newRowName = newRootInfo.getAttribute("rowName");
-        NodeList newNodesMap = mapRoot.getElementsByTagName("element");
-        Element newRootElement = newDoc.createElement(newRootName);
-        NodeList oldRows = dataRoot.getElementsByTagName("row");
-        for (int i = 0; i < oldRows.getLength(); i++) {
-            Element thisRow = (Element) oldRows.item(i);
-            Element newRow = newDoc.createElement(newRowName);
-            for (int j = 0; j < newNodesMap.getLength(); j++) {
-                Element thisElement = (Element) newNodesMap.item(j);
-                String newElementName = thisElement.getAttribute("name");
-                Element oldElement = (Element) thisElement.getElementsByTagName("content").item(0);
-                String oldField = oldElement.getFirstChild().getNodeValue();
-                Element oldValueElement = (Element) thisRow.getElementsByTagName(oldField).item(0);
-                String oldValue = oldValueElement.getFirstChild().getNodeValue();
-                Element newElement = newDoc.createElement(newElementName);
-                newElement.appendChild(newDoc.createTextNode(oldValue));
-                NodeList newAttributes = thisElement.getElementsByTagName("attribute");
-//                for (int k = 0; k < newAttributes.getLength(); k++) {
-//                    //Для каждого нового атрибута
-//                    //Получение информации отображения
-//                    Element thisAttribute = (Element) newAttributes.item(k);
-//                    String oldAttributeField = thisAttribute.getFirstChild().getNodeValue();
-//                    String newAttributeName = thisAttribute.getAttribute("name");
-//                    //Получение исходного значения
-//                    oldValueElement = (Element) thisRow.getElementsByTagName(oldAttributeField).item(0);
-//                    String oldAttributeValue = oldValueElement.getFirstChild().getNodeValue();
-//                    //Создание нового атрибута
-//                    newElement.setAttribute(newAttributeName, oldAttributeValue);
-//                }
-                newRow.appendChild(newElement);
-            }
-            newRootElement.appendChild(newRow);
-        }
-        newDoc.appendChild(newRootElement);
-
-        Transformer trf = null;
-        DOMSource src = null;
-        FileOutputStream fos = null;
-        try {
-            trf = TransformerFactory.newInstance().newTransformer();
-            src = new DOMSource(newDoc);
-            fos = new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml");
-
-            StreamResult result = new StreamResult(fos);
-            trf.transform(src, result);
-        } catch (TransformerException e) {
-            e.printStackTrace(System.out);
-        } catch (IOException e) {
-            e.printStackTrace(System.out);
-        }
-    }
-
     public static void getTask(int id) {
         Document mapDoc = null;
         Document dataDoc = null;
@@ -241,7 +136,7 @@ public class OperationsTasks {
         try {
             DocumentBuilderFactory dbfactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docbuilder = dbfactory.newDocumentBuilder();
-            mapDoc = docbuilder.parse("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping2.xml");
+            mapDoc = docbuilder.parse("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping.xml");
             dataDoc = docbuilder.newDocument();
             newDoc = docbuilder.newDocument();
 
@@ -315,8 +210,7 @@ public class OperationsTasks {
         try {
             trf = TransformerFactory.newInstance().newTransformer();
             src = new DOMSource(newDoc);
-            fos = new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test2.xml");
-
+            fos = new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\result.xml");
             StreamResult result = new StreamResult(fos);
             trf.transform(src, result);
         } catch (TransformerException e) {
@@ -328,22 +222,9 @@ public class OperationsTasks {
 
     public static void taskXSLT() {
         try {
-            TransformerFactory tFactory = TransformerFactory.newInstance();
-            Transformer transformer = tFactory.newTransformer(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping.xsl"));
-            transformer.transform(new StreamSource("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml"), new StreamResult(new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\web\\test.html")));
-
-        } catch (TransformerConfigurationException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (TransformerException | FileNotFoundException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    public static void taskXSLT2() {
-        try {
-            String s1 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping2.xsl";
-            String s2 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\web\\test2.html";
-            String s3 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test2.xml";
+            String s1 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\mapping.xsl";
+            String s2 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\web\\import.html";
+            String s3 = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\result.xml";
             TransformerFactory tFactory = TransformerFactory.newInstance();
             Transformer transformer = tFactory.newTransformer(new StreamSource(s1));
             FileOutputStream fout = new FileOutputStream(s2);
@@ -362,9 +243,8 @@ public class OperationsTasks {
 
     public static boolean checkXMLforXSD() {
         try {
-            String xml = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\test.xml";
+            String xml = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\result.xml";
             String xsd = "C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\xmlSchema.xsd";
-
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = factory.newSchema(new StreamSource(xsd));
             Validator validator = schema.newValidator();

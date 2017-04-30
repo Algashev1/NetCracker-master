@@ -29,7 +29,9 @@
         message = list.updateTask(Integer.parseInt(id), request.getParameter("name"), request.getParameter("description"), request.getParameter("time"), request.getParameter("contacts"));
     }
     OperationsTasks.getTask(Integer.parseInt(id));
-    OperationsTasks.taskXSLT2();
+    if (OperationsTasks.checkXMLforXSD()) {
+        OperationsTasks.taskXSLT();
+    }
 %>
 
 <!DOCTYPE html>
@@ -38,7 +40,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Изменение задачи</title>
         <link rel="stylesheet" href="style.css">
-        <link rel="import" href="test2.html">
+        <link rel="import" href="import.html">
     </head>
     <body>
         <div class="cont">

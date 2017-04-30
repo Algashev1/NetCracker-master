@@ -87,11 +87,7 @@
                     response.sendRedirect("http://localhost:8084/WebLab3/");
                 } else {
                     TaskList taskList = new TaskList(Integer.parseInt(session.getAttribute("id").toString()));
-                    OperationsTasks.getTaskList(Integer.parseInt(session.getAttribute("id").toString()));
-                    if (OperationsTasks.checkXMLforXSD()) {
-                        OperationsTasks.taskXSLT();
-                    }
-
+                   
                     int actTaskNum = -1;
                     String buf = "";
                     String url = request.getQueryString();
@@ -214,7 +210,6 @@
                     }%>
             </table>
             <a class="btn" href="add.jsp">Добавить задачу</a>
-            <a class="btn" href="test.html">Вывод через XSLT</a>
             <%}
             %>
         </div>
