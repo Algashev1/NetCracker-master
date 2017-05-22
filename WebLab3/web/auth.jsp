@@ -4,12 +4,18 @@
     Author     : 1
 --%>
 
+<%@page import="pac.Factory"%>
+<%@page import="pac.logic.Client"%>
 <%@page import="javax.sql.DataSource"%>
 <%@page import="javax.naming.InitialContext"%>
 <%@page import="javax.naming.Context"%>
 <%@page import="java.sql.*"%>
+<%@page import="org.apache.log4j.Logger" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-
+<%
+    Logger log = Logger.getLogger("auth.jsp");
+    log.info("загрузка auth.jsp");
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -33,32 +39,14 @@
                 }
 
                 if (login != "" && password != "") {
-                    Connection conn = null;
                     try {
-                        Context ctx = new InitialContext();
-                        DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
-                        conn = ds.getConnection();
-                        String sql = "SELECT * FROM Client";
-                        PreparedStatement pStatement = conn.prepareStatement(sql);
-                        ResultSet result = pStatement.executeQuery();
-
-                        while (result.next()) {
-                            if (result.getObject(3).toString().equals(login) && result.getObject(4).toString().equals(password)) {
-                                HttpSession s = request.getSession(true);
-                                s.setAttribute("id", new String(result.getObject(1).toString()));
-                                s.setAttribute("name", new String(result.getObject(2).toString()));
-                                s.setAttribute("login", new String(result.getObject(3).toString()));
-                                s.setAttribute("password", new String(result.getObject(4).toString()));
-                                answer = "";
-                                break;
-                            } else {
-                                answer = "Неправильный логин или пароль! Попробуйте снова!";
-                            }
-                        }
-                        result.close();
-                        pStatement.close();
-                        ctx.close();
-                        conn.close();
+                        Client cl = Factory.getInstance().getClientDAO().authClient(login, password);
+                        HttpSession s = request.getSession(true);
+                        s.setAttribute("id", new String(cl.getId()));
+                        s.setAttribute("name", new String(cl.getName()));
+                        s.setAttribute("login", new String(cl.getLogin()));
+                        s.setAttribute("password", new String(cl.getPassword()));
+                        answer = "";
                     } catch (Exception e) {
                         answer = "Регистрация не прошла! Исключение:" + e.getMessage();
                     }

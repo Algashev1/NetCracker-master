@@ -3,13 +3,16 @@
 <%@page import="java.sql.PreparedStatement"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="java.sql.DriverManager"%>
-<%@page import="pac.Task"%>
+<%@page import="pac.logic.Task"%>
 <%@page import="pac.TaskList"%>
+<%@page import="org.apache.log4j.Logger" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%@page import="pac.*"%>
 
 <%
+    Logger log = Logger.getLogger("change.jsp");
+    log.info("загрузка change.jsp");
     String id = "";
     String url = request.getQueryString();
     String message = "";
@@ -41,6 +44,9 @@
         <title>Изменение задачи</title>
         <link rel="stylesheet" href="style.css">
         <link rel="import" href="import.html">
+        <link rel="stylesheet" type="text/css" href="js/jquery.datetimepicker.css"/>
+        <script src="js/jquery.js"></script>
+        <script src="js/jquery.datetimepicker.full.js"></script>
     </head>
     <body>
         <div class="cont">
@@ -54,6 +60,9 @@
                     var template = doc.querySelector('template');
                     var clone = document.importNode(template.content, true);
                     document.querySelector("#container").appendChild(clone);
+                </script>
+                <script>
+                    $('#datetimepicker').datetimepicker();
                 </script>
                 <input type="submit" value="Изменить" />
             </form>

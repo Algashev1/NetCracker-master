@@ -5,13 +5,16 @@
 --%>
 
 <%@page import="pac.TaskList"%>
+<%@page import="org.apache.log4j.Logger" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%
+    Logger log = Logger.getLogger("add.jsp");
     String message = "";
     String id = "";
     String url = request.getQueryString();
 
+    log.info("загрузка add.jsp");
     if (url != null) {
         if (url.contains("=")) {
             String perArr[] = url.split("=");
@@ -31,11 +34,14 @@
 %>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Добавление задачи</title>
         <link rel="stylesheet" href="style.css">
+        <link rel="stylesheet" type="text/css" href="js/jquery.datetimepicker.css"/>
+        <script src="js/jquery.js"></script>
+        <script src="js/jquery.datetimepicker.full.js"></script>
     </head>
     <body>
         <div class="cont">
@@ -54,7 +60,12 @@
                     </tr>
                     <tr>
                         <td>Дата/Время:</td>
-                        <td><input type="datetime" name="time" placeholder="гггг-мм-дд чч:мм"/></td>
+                        <td>   
+                            <input type="text" name="time" id="datetimepicker"/>  
+                            <script>
+                                $('#datetimepicker').datetimepicker();
+                            </script>
+                        </td>
                     </tr>
                     <tr>
                         <td>Контакты:</td>

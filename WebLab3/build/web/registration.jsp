@@ -6,8 +6,12 @@
 
 <%@page import="java.sql.*"%>
 <%@page import="pac.*"%>
+<%@page import="org.apache.log4j.Logger" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-
+<%
+    Logger log = Logger.getLogger("registration.jsp");
+    log.info("загрузка registration.jsp"); 
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -36,11 +40,11 @@
                 }
 
                 if (name != "" && login != "" && password != "") {
-                    answer = OperationsTasks.regClient(name, login, password);
+                    answer = Factory.getInstance().getClientDAO().regClient(name, login, password);
                     out.println("<div class=\"message\">" + answer + "</div><a href=\"index.jsp\">Перейдите по ссылке на предыдущую страницу</a> ");
                 } else {
                     answer = "Регистрация не прошла! Попробуйте снова!";
-                    out.println("<div class=\"message\">"+ answer + "</div><a href=\"index.jsp\">Перейдите по ссылке на предыдущую страницу</a> ");
+                    out.println("<div class=\"message\">" + answer + "</div><a href=\"index.jsp\">Перейдите по ссылке на предыдущую страницу</a> ");
                 }
             %>
         </div>

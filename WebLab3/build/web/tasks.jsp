@@ -1,3 +1,4 @@
+<%@page import="pac.logic.Task"%>
 <%@page import="javax.servlet.annotation.WebServlet"%>
 <%@page import="java.lang.String"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -11,14 +12,16 @@
 <%@page import="java.sql.DriverManager"%>
 <%@page import="java.sql.PreparedStatement"%>
 <%@page import="javax.naming.*"%>
+<%@page import="org.apache.log4j.Logger" %>
 
 <%@page import="pac.*"%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%!
+    Logger log = Logger.getLogger("tasks.jsp");
     String message = "";
 %>
-
+<% log.info("загрузка tasks.jsp"); %>
 <!DOCTYPE html>
 <html>
 
@@ -87,7 +90,7 @@
                     response.sendRedirect("http://localhost:8084/WebLab3/");
                 } else {
                     TaskList taskList = new TaskList(Integer.parseInt(session.getAttribute("id").toString()));
-                   
+
                     int actTaskNum = -1;
                     String buf = "";
                     String url = request.getQueryString();
@@ -117,11 +120,14 @@
 
                                 }
                             }
+
+                        } else if (url.toString().equals("toExcel")) {
+                            OperationsTasks.toExcel(taskList.getTaskList());
                         }
                     }
             %>
             <div class="message"><%= message%></div>
-            <table class="taskTable" >  
+            <table class="taskTable" > 
                 <thead>
                     <tr class="bg">
                         <th class= "th2">Подзадачи</th>
@@ -138,7 +144,7 @@
                 </thead>
                 <%
                     for (int i = 0; i < taskList.getTaskList().size(); i++) {
-                        if (session.getAttribute("id").toString().contains(taskList.getTaskList().get(i).getUserId())) {
+                        if (session.getAttribute("id").toString().contains(taskList.getTaskList().get(i).getClient().getId())) {
                             if (l != null) {
                                 for (int k = 0; k < l.size(); k++) {
                                     if (l.get(k).equals(taskList.getTaskList().get(i).getId())) {
@@ -156,7 +162,11 @@
                             <input type="checkbox" name="a<%=taskList.getTaskList().get(i).getId()%>" id="a<%=taskList.getTaskList().get(i).getId()%>" data-toggle="toggle"> 
                         </td>
                         <td class= "td2"> 
-                            <%boolean flag = taskList.getTaskList().get(i).getIndex();
+                            <%
+                                boolean flag = true;
+                                if (taskList.getTaskList().get(i).getIndex().equals("2")) {
+                                    flag = false;
+                                }
                                 if (flag) {
                             %>
                             <input type="checkbox" id='<%=taskList.getTaskList().get(i).getId()%>'>
@@ -167,42 +177,48 @@
                             <%}%>
                         </td>
                         <td class= "td2"> <%=taskList.getTaskList().get(i).getName()%> </td>
-                        <td class= "td2"> <%=taskList.getTaskList().get(i).getDescription()%> </td>
-                        <td class= "td2"> <%=taskList.getTaskList().get(i).getTime()%> </td>
-                        <td class= "td2"> <%=taskList.getTaskList().get(i).getContacts()%></td>
+                        <td class= "td2"> <%=taskList.getTaskList().get(i).getDesc()%> </td>
+                        <td class= "td2"> <%=taskList.getTaskList().get(i).getData()%> </td>
+                        <td class= "td2"> <%=taskList.getTaskList().get(i).getCont()%></td>
                         <td class= "td2"> <a href="change.jsp?id=<%=taskList.getTaskList().get(i).getId()%>">Изменить</a></td>
                         <td class= "td2"> <a href="?complete=<%=taskList.getTaskList().get(i).getId()%>">Завершить/активировать</a> </td>
                         <td class= "td2"> <a href="add.jsp?id=<%=taskList.getTaskList().get(i).getId()%>">Добавить подзадачу</a></td>
                         <td class= "td2"> <a href="?delete=<%=taskList.getTaskList().get(i).getId()%>">Удалить</a> </td>
                     </tr>
                 </tbody>
-                <tbody class="hide">
-                    <%ArrayList<Task> list = taskList.parentTask(Integer.parseInt(taskList.getTaskList().get(i).getId()));
-                        for (int j = 0; j < list.size(); j++) {
-                    %>
 
-                    <tr class=<%=buf%>>
-                        <td class= "td2"></td>
-                        <td class= "td2">
-                            <%boolean flag2 = list.get(j).getIndex();
-                                if (flag2) {
-                            %>
-                            <input type="checkbox" id='<%=list.get(j).getId()%>'>
-                            <%} else {%>
-                            <input type="checkbox" id='<%=list.get(j).getId()%>' checked="checked">
-                            <% }%>
-                        </td>
-                        <td class= "td2"><%=list.get(j).getName()%></td>
-                        <td class= "td2"><%=list.get(j).getDescription()%></td>
-                        <td class= "td2"><%=list.get(j).getTime()%></td>
-                        <td class= "td2"><%=list.get(j).getContacts()%></td>
-                        <td class= "td2"> <a href="change.jsp?id=<%=list.get(j).getId()%>">Изменить</a></td>
-                        <td class= "td2"> <a href="?complete=<%=list.get(j).getId()%>">Завершить/активировать</a> </td>
-                        <td class= "td2"> </td>
-                        <td class= "td2"> <a href="?delete=<%=list.get(j).getId()%>">Удалить</a> </td>
-                    </tr>
-                    <% } %>
-                </tbody> 
+                <%
+                    List<Task> list = taskList.parentTask(Integer.parseInt(taskList.getTaskList().get(i).getId()));
+                    for (int j = 0; j < list.size(); j++) {
+                %>
+
+                <tr class=<%=buf%>>
+                    <td class= "td2"></td>
+                    <td class= "td2">
+                        <%
+                            boolean flag2 = true;
+                            if (list.get(j).getIndex().equals("2")) {
+                                flag2 = false;
+                            }
+
+                            if (flag2) {
+                        %>
+                        <input type="checkbox" id='<%=list.get(j).getId()%>'>
+                        <%} else {%>
+                        <input type="checkbox" id='<%=list.get(j).getId()%>' checked="checked">
+                        <% }%>
+                    </td>
+                    <td class= "td2"><%=list.get(j).getName()%></td>
+                    <td class= "td2"><%=list.get(j).getDesc()%></td>
+                    <td class= "td2"><%=list.get(j).getData()%></td>
+                    <td class= "td2"><%=list.get(j).getCont()%></td>
+                    <td class= "td2"> <a href="change.jsp?id=<%=list.get(j).getId()%>">Изменить</a></td>
+                    <td class= "td2"> <a href="?complete=<%=list.get(j).getId()%>">Завершить/активировать</a> </td>
+                    <td class= "td2"> </td>
+                    <td class= "td2"> <a href="?delete=<%=list.get(j).getId()%>">Удалить</a> </td>
+                </tr>
+                <% } %>
+
                 </tbody>
 
                 <%buf = "";
@@ -210,6 +226,7 @@
                     }%>
             </table>
             <a class="btn" href="add.jsp">Добавить задачу</a>
+            <a class="btn" a href="?toExcel">Экспорт в Excel</a>
             <%}
             %>
         </div>

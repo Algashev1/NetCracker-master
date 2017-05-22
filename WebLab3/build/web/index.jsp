@@ -1,22 +1,18 @@
-<%-- 
-    Document   : index
-    Created on : 09.03.2017, 15:57:22
-    Author     : 1
---%>
-
+<%@page import="java.util.List"%>
+<%@page import="pac.logic.Task"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="pac.Factory"%>
+<%@page import="org.hibernate.mapping.Collection"%>
+<%@page import="java.util.logging.FileHandler"%>
+<%@page import="org.apache.log4j.Logger" %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 <%
-//    String url = request.getQueryString();
-//    if (url != null) {
-//        if (url.contains("=")) {
-//            String perArr[] = url.split("=");
-//            if(perArr[0].contains("exit") && perArr[1].contains("true")){
-//                out.println("Уничтожил!");
-//                session.putValue("id", "null");
-//            }
-//        }
-//    }
+    Logger log = Logger.getLogger("index.jsp");
+    //List<Task> list = new ArrayList<>();
+    //list = Factory.getInstance().getTaskDAO().parentTask(15);
+    //Factory.getInstance().getTaskDAO().returnTask("5");
+    log.info("загрузка index.jsp");
 %>
 
 <!DOCTYPE html>
@@ -30,7 +26,7 @@
         <script>
             function display(id) {
                 var el = document.getElementById(id);
-                if (el.style.display == "none") {
+                if (el.style.display === "none") {
                     el.style.display = "block";
                 } else {
                     el.style.display = "none";

@@ -28,7 +28,7 @@
                         <tr>
                             <td>Time</td>
                             <td>
-                                <input type="text" name="time">
+                                <input type="text" name="time"  id="datetimepicker">
                                     <xsl:attribute name="value">
                                         <xsl:value-of select="t_data" />
                                     </xsl:attribute>

@@ -8,11 +8,7 @@ import java.sql.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -21,111 +17,36 @@ import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.*;
+import org.apache.log4j.Logger;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import pac.logic.Task;
 
 public class OperationsTasks {
 
+    private static final Logger log = Logger.getLogger(OperationsTasks.class);
+
     public static String regClient(String name, String login, String password) {
-        Connection conn;
-        try {
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
-            conn = ds.getConnection();
-            String sql = "INSERT INTO Client VALUE (NULL, ?,  ?, ?)";
-            PreparedStatement pStatement = conn.prepareStatement(sql);
-            pStatement.setString(1, name);
-            pStatement.setString(2, login);
-            pStatement.setString(3, password);
-            pStatement.execute();
-            pStatement.close();
-            ctx.close();
-            conn.close();
-            return "Регистрация прошла успешно!";
-        } catch (SQLException | NamingException e) {
-            return "Регистрация не прошла! Попробуйте снова!";
-        }
+        return Factory.getInstance().getClientDAO().regClient(name, login, password);
     }
 
     //метод проверяет какие задачи оказались просроченными
     public static String overdueTask(String s_id) {
-        Connection conn;
-        String message;
-        Date d = new Date();
-        ArrayList<String> list = new ArrayList<>();
-        try {
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
-            conn = ds.getConnection();
-            String sql = "SELECT t_name FROM Task WHERE t_index = 1 AND t_data < ? AND u_id = ?";
-            PreparedStatement pStatement = conn.prepareStatement(sql);
-            String s = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(d);
-            pStatement.setString(1, s);
-            pStatement.setString(2, s_id);
-            ResultSet result = pStatement.executeQuery();
-            while (result.next()) {
-                list.add(result.getObject(1).toString());
-            }
-            result.close();
-            pStatement.close();
-            ctx.close();
-            conn.close();
-
-            if ((list != null) && (0 < list.size())) {
-                message = "Просрочены следующие задачи:";
-                for (int i = 0; i < list.size(); i++) {
-                    if (i == 0) {
-                        message += " " + list.get(i);
-                    } else {
-                        message += " ," + list.get(i);
-                    }
-                }
-            } else {
-                message = "Нет просроченных задач";
-            }
-            return message;
-        } catch (SQLException | NamingException e) {
-            return e.getMessage();
-        }
+        return Factory.getInstance().getTaskDAO().overdueTask(Integer.parseInt(s_id));
     }
 
     public static ArrayList<String> returnTask(String id) {
-        Connection conn;
-        try {
-            Context ctx = new InitialContext();
-            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/TestDB");
-            conn = ds.getConnection();
-            String sql = "SELECT t_id, t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i'), t_contacts, u_id FROM Task WHERE t_id = ?";
-            PreparedStatement pStatement = conn.prepareStatement(sql);
-            pStatement.setString(1, id);
-            ResultSet result = pStatement.executeQuery();
-            ArrayList<String> list = new ArrayList<>();
-            if (result.next()) {
-                list.add(result.getString(1));
-                list.add(result.getString(2));
-                list.add(result.getString(3));
-                list.add(result.getString(4));
-                list.add(result.getString(5));
-                list.add(result.getString(6));
-            }
-            result.close();
-            pStatement.close();
-            ctx.close();
-            conn.close();
-            return list;
-        } catch (SQLException | NamingException e) {
-            return null;
-        }
+        return Factory.getInstance().getTaskDAO().returnTask(id);
     }
 
     public static void getTask(int id) {
@@ -140,8 +61,8 @@ public class OperationsTasks {
             dataDoc = docbuilder.newDocument();
             newDoc = docbuilder.newDocument();
 
-        } catch (IOException | ParserConfigurationException | SAXException e) {
-            System.out.println(e.getMessage());
+        } catch (IOException | ParserConfigurationException | SAXException ex) {
+            log.error("Exception: ", ex);
         }
         Element mapRoot = mapDoc.getDocumentElement();
         String sql = "SELECT t_name, t_description, date_format(t_data, '%Y-%m-%d %H:%i') AS t_data, t_contacts FROM Task WHERE t_id = ?";
@@ -171,12 +92,8 @@ public class OperationsTasks {
                 }
                 dataRoot.appendChild(rowEl);
             }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        } catch (NamingException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            System.out.println("Closing connections...");
+        } catch (SQLException | NamingException ex) {
+            log.error("Exception: ", ex);
         }
         dataDoc.appendChild(dataRoot);
         Element newRootInfo = (Element) mapRoot.getElementsByTagName("root").item(0);
@@ -213,11 +130,10 @@ public class OperationsTasks {
             fos = new FileOutputStream("C:\\Users\\DNS\\Desktop\\NetCracker-master\\WebLab3\\src\\java\\pac\\result.xml");
             StreamResult result = new StreamResult(fos);
             trf.transform(src, result);
-        } catch (TransformerException e) {
-            e.printStackTrace(System.out);
-        } catch (IOException e) {
-            e.printStackTrace(System.out);
+        } catch (TransformerException | IOException ex) {
+            log.error("Exception: ", ex);
         }
+        log.debug("getTask(int id)");
     }
 
     public static void taskXSLT() {
@@ -232,12 +148,13 @@ public class OperationsTasks {
             StreamResult sr = new StreamResult(fout);
             transformer.transform(ss, sr);
             Thread.sleep(2000);
+            log.debug("taskXSLT()");
         } catch (TransformerConfigurationException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
+            log.error("Exception: ", ex);
         } catch (TransformerException | FileNotFoundException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
+            log.error("Exception: ", ex);
         } catch (IOException | InterruptedException ex) {
-            Logger.getLogger(OperationsTasks.class.getName()).log(Level.SEVERE, null, ex);
+            log.error("Exception: ", ex);
         }
     }
 
@@ -249,10 +166,42 @@ public class OperationsTasks {
             Schema schema = factory.newSchema(new StreamSource(xsd));
             Validator validator = schema.newValidator();
             validator.validate(new StreamSource(xml));
+            log.debug("checkXMLforXSD()");
             return true;
-        } catch (SAXException | IOException e) {
-            System.out.println(e.getMessage());
+        } catch (SAXException | IOException ex) {
+            log.error("Exception: ", ex);
             return false;
         }
+    }
+
+    public static void toExcel(ArrayList<Task> list) {
+        try {
+            HSSFWorkbook book = new HSSFWorkbook();
+            HSSFSheet sheet = book.createSheet("Tasks");
+
+            Row row1 = sheet.createRow(0);
+            row1.createCell(0).setCellValue("Name");
+            row1.createCell(1).setCellValue("Description");
+            row1.createCell(2).setCellValue("Time");
+            row1.createCell(3).setCellValue("Contacts");
+            for (int i = 0; i < list.size(); i++) {
+                Row row2 = sheet.createRow(i + 1);
+                row2.createCell(0).setCellValue(list.get(i).getName());
+                row2.createCell(1).setCellValue(list.get(i).getDesc());
+                row2.createCell(2).setCellValue(list.get(i).getData());
+                row2.createCell(3).setCellValue(list.get(i).getCont());
+            }
+            sheet.autoSizeColumn(0);
+            sheet.autoSizeColumn(1);
+            sheet.autoSizeColumn(2);
+            sheet.autoSizeColumn(3);
+            FileOutputStream out = new FileOutputStream(new File("D:\\Apache POI Excel File.xls"));
+            book.write(out);
+            book.close();
+            log.debug("toExcel");
+        } catch (IOException ex) {
+            log.error("Exception: ", ex);
+        }
+
     }
 }
